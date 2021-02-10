@@ -1,6 +1,8 @@
 const express = require('express')
 const app = express()
 
+app.use(express.json())
+
 let persons = [
     {
         "name": "Arto Hellas",
@@ -24,6 +26,37 @@ let persons = [
     }
 ]
 
+const generateId = () => {
+    return Math.floor(Math.random() * 1000000000)
+}
+
+app.get('/info', (request, response) => {
+    response.send(`
+        <div>
+            <p>Phonebook has info for ${persons.length} people
+            <p>${new Date().toString()}</p>
+        </div>
+    `)
+})
+
+app.post('/api/persons', (request, response) => {
+    if(!request.body.name) {
+        return response.status(400).json({error: 'name missing'})
+    }
+    if(!request.body.number) {
+        return response.status(400).json({error: 'number missing'})
+    }
+
+    const person = {
+        name: request.body.name,
+        number: request.body.number,
+        id: generateId()
+    }
+
+    persons = persons.concat(person)
+    response.json(person)
+})
+
 app.get('/api/persons', (request, response) => {
     response.json(persons)
 })
@@ -40,15 +73,6 @@ app.get('/api/persons/:id', (request, response) => {
 app.delete('/api/persons/:id', (request, response) => {
     persons = persons.filter((p) => p.id !== Number(request.params.id))
     response.status(204).end()
-})
-
-app.get('/info', (request, response) => {
-    response.send(`
-        <div>
-            <p>Phonebook has info for ${persons.length} people
-            <p>${new Date().toString()}</p>
-        </div>
-    `)
 })
 
 const PORT = 3001
