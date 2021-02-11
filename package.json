@@ -4,7 +4,7 @@
   "description": "Exercises for part 3 of online course Full stack open 2020 (https://fullstackopen.com/en/)",
   "main": "index.js",
   "scripts": {
-    "start": "nodejs index.js",
+    "start": "node index.js",
     "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
