@@ -38,18 +38,16 @@ app.post('/api/persons', (request, response) => {
     if(!request.body.number) {
         return response.status(400).json({error: 'number missing'})
     }
-    if(persons.find((p) => p.name === request.body.name)) {
-        return response.status(400).json({error: 'name must be unique'})
-    }
-
-    const person = {
+    const person = new Person({
         name: request.body.name,
-        number: request.body.number,
-        id: generateId()
-    }
-
-    persons = persons.concat(person)
-    response.json(person)
+        number: request.body.number
+    })
+    person.save()
+        .then(savedPerson => response.json(savedPerson))
+        .catch(error => {
+            console.log('Error while saving person: ', error.message)
+            response.status(500).end()
+        })
 })
 
 app.get('/api/persons', (request, response) => {
