@@ -1,5 +1,7 @@
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
+const Person = require('./models/person')
 const app = express()
 
 app.use(express.static('build'))
@@ -8,40 +10,25 @@ app.use(express.json())
 morgan.token('body', (req, res) => JSON.stringify(req.body))
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
-let persons = [
-    {
-        "name": "Arto Hellas",
-        "number": "040-123456",
-        "id": 1
-    },
-    {
-        "name": "Ada Lovelace",
-        "number": "39-44-5323523",
-        "id": 2
-    },
-    {
-        "name": "Dan Abramov",
-        "number": "12-43-234345",
-        "id": 3
-    },
-    {
-        "name": "Mary Poppendieck",
-        "number": "39-23-6423122",
-        "id": 4
-    }
-]
-
-const generateId = () => {
-    return Math.floor(Math.random() * 1000000000)
-}
-
 app.get('/info', (request, response) => {
-    response.send(`
-        <div>
-            <p>Phonebook has info for ${persons.length} people
-            <p>${new Date().toString()}</p>
-        </div>
-    `)
+    Person.estimatedDocumentCount()
+        .then(personsCount => {
+            response.send(`
+                <div>
+                    <p>Phonebook has info for ${personsCount} people</p>
+                    <p>${new Date().toString()}</p>
+                </div>
+            `)
+        })
+        .catch(error => {
+            console.log("Error when counting amount of people: ", error.message)
+            response.send(`
+                <div>
+                    <p>It was not possible to obtain the amount of persons in the phonebook</p>
+                    <p>${new Date().toString()}</p>
+                </div>
+            `)
+        })
 })
 
 app.post('/api/persons', (request, response) => {
@@ -66,16 +53,18 @@ app.post('/api/persons', (request, response) => {
 })
 
 app.get('/api/persons', (request, response) => {
-    response.json(persons)
+    Person.find({})
+        .then(persons => response.json(persons))
+        .catch(error => console.log("Error while fetching persons: ", error.message))
 })
 
 app.get('/api/persons/:id', (request, response) => {
-    const person = persons.find((p) => p.id === Number(request.params.id))
-    if(person) {
-        response.json(person)
-    } else {
-        response.status(404).end()
-    }
+    Person.findById(request.params.id)
+        .then(person => response.json(person))
+        .catch(error => {
+            console.log("Error while fetching person: ", error.message)
+            response.status(404).end()
+        })
 })
 
 app.delete('/api/persons/:id', (request, response) => {
@@ -83,7 +72,6 @@ app.delete('/api/persons/:id', (request, response) => {
     response.status(204).end()
 })
 
-const PORT = process.env.PORT || 3001
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`)  
+app.listen(process.env.PORT, () => {
+    console.log(`Server running on port ${process.env.PORT}`)  
 })
