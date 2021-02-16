@@ -49,6 +49,22 @@ app.post('/api/persons', (request, response, next) => {
         .catch(error => next(error))
 })
 
+app.put('/api/persons/:id', (request, response, next) => {
+    if(!request.body.name) {
+        return response.status(400).json({error: 'name missing'})
+    }
+    if(!request.body.number) {
+        return response.status(400).json({error: 'number missing'})
+    }
+    const person = {
+        name: request.body.name,
+        number: request.body.number
+    }
+    Person.findByIdAndUpdate(request.params.id, person, { new: true })
+        .then(savedPerson => response.json(savedPerson))
+        .catch(error => next(error))
+})
+
 app.get('/api/persons', (request, response, next) => {
     Person.find({})
         .then(persons => response.json(persons))
