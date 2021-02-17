@@ -8,11 +8,16 @@ mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTop
 const personSchema = new mongoose.Schema({
     name: {
         type: String,
+        minLength: [3, 'Must have at least 3 characters.'],
         unique: true,
         required: true
     },
     number: {
         type: String,
+        validate: {
+            validator: value => value.match(/\d/g).length > 7,
+            message: props => "Must have at least 8 digits."
+        },
         required: true
     }
 })
