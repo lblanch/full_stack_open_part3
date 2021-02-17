@@ -8,10 +8,12 @@ app.use(express.static('build'))
 app.use(express.json())
 
 const errorHandler = (error, request, response, next) => {
-    console.log("Error Handler: ", error.message)
+    console.log("[Error Handler] ", error.name, ": ", error.message)
 
     if (error.name === "CastError") {
         return response.status(400).send({ error: 'malformated id' })
+    } else if (error.name === "ValidationError") {
+        return response.status(400).send({ error: error.message})
     }
 
     next(error)
@@ -34,12 +36,6 @@ app.get('/info', (request, response, next) => {
 })
 
 app.post('/api/persons', (request, response, next) => {
-    if(!request.body.name) {
-        return response.status(400).json({error: 'name missing'})
-    }
-    if(!request.body.number) {
-        return response.status(400).json({error: 'number missing'})
-    }
     const person = new Person({
         name: request.body.name,
         number: request.body.number
