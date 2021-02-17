@@ -10,26 +10,26 @@ const password = process.argv[2]
 const url =`mongodb+srv://fullstack:${password}@cluster0.cuije.mongodb.net/phonebook-app?retryWrites=true&w=majority`
 
 mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true })
-    .then(response => console.log("Connection successful"))
-    .catch(error => console.log("Error connecting: ", error))
+    .then(() => console.log('Connection successful'))
+    .catch(error => console.log('Error connecting: ', error))
 
 const personSchema = new mongoose.Schema({
     name: String,
     number: String
 })
-    
+
 const Person = mongoose.model('Person', personSchema)
-      
+
 
 if (process.argv.length === 3) {
     Person.find({})
         .then(result => {
-            console.log("phonebook:")
+            console.log('phonebook:')
             result.forEach(person => {
-                console.log(person.name, " ", person.number)
+                console.log(person.name, ' ', person.number)
             })
         })
-        .catch(error => console.log("Error while fetching persons: ", error))
+        .catch(error => console.log('Error while fetching persons: ', error))
         .finally(() => mongoose.connection.close())
 } else if (process.argv.length > 4) {
     const person = new Person({
@@ -41,6 +41,6 @@ if (process.argv.length === 3) {
         .catch(error => console.log('Error while saving person: ', error))
         .finally(() => mongoose.connection.close())
 } else {
-    console.log("Wrong amount of parameters.")
+    console.log('Wrong amount of parameters.')
     mongoose.connection.close()
 }
